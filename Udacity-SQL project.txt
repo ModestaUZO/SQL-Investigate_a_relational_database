@@ -1,0 +1,75 @@
+--MY QUESTIONS
+
+--Most popular film categories based on the number of rentals
+--Average rental duration for each category
+--Staff performance analysis
+--Actors in most films
+
+
+--number 1
+--Most popular film categories based on the number of rentals
+WITH H1 AS (SELECT f.title title, c.name category, DATE_TRUNC('day', r.rental_date) rental_date
+FROM category c
+JOIN film_category fc
+ON c.category_id = fc.category_id
+JOIN film f
+ON f.film_id = fc.film_id
+JOIN inventory i 
+ON i.film_id = f.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id)
+
+SELECT title, category, COUNT(rental_date) count_of_rental
+FROM H1
+GROUP BY 1,2
+ORDER BY 3 DESC
+LIMIT 10;
+
+--number 2
+--Average rental duration for each category
+WITH Y1 AS (SELECT f.title title, c.name category, f.rental_duration rental_duration, r.rental_id rental_id
+FROM category c
+JOIN film_category fc
+ON c.category_id = fc.category_id
+JOIN film f
+ON f.film_id = fc.film_id
+JOIN inventory i 
+ON i.film_id = f.film_id
+JOIN rental r
+ON r.inventory_id = i.inventory_id)
+
+SELECT category, AVG(rental_duration) avg_rental_duration
+FROM Y1
+GROUP BY 1
+ORDER BY 2 DESC;
+
+
+--NUMBER 3
+--STAFF PERFORMANCE ANALYSIS
+SELECT s.staff_id staff_id, CONCAT(s.first_name, ' ', s.last_name) AS full_name, COUNT(r.rental_id) rental_count, RANK() OVER (ORDER BY COUNT(r.rental_id) DESC) AS rank_num
+FROM staff s                                                         JOIN payment p                                                       ON s.staff_id = p.staff_id     
+JOIN rental r
+ON p.rental_id = r.rental_id
+GROUP BY 1,2 
+ORDER BY rental_count;
+
+
+--Number 4
+--Actors in most films
+SELECT a.actor_id actor_id, CONCAT (a.first_name, ' ', a.last_name) AS full_name, COUNT(fa.actor_id) AS film_count, RANK() OVER (ORDER BY COUNT(fa.actor_id)DESC) AS rank_num
+FROM actor a
+JOIN film_actor fa
+ON a.actor_id = fa.actor_id
+GROUP BY 1,2
+ORDER BY film_count DESC;
+
+
+
+
+
+
+
+
+
+
+                                                                     
